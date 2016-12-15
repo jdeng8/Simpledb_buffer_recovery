@@ -67,7 +67,9 @@ public class RecoveryMgr {
       if (isTempBlock(blk))
          return -1;
       else
-         return new SetIntRecord(txnum, blk, offset, oldval).writeToLog();
+    	 //Task 2
+    	 //Store both the old value and new value in the log record
+         return new SetIntRecord(txnum, blk, offset, oldval, newval).writeToLog();
    }
 
    /**
@@ -84,7 +86,9 @@ public class RecoveryMgr {
       if (isTempBlock(blk))
          return -1;
       else
-         return new SetStringRecord(txnum, blk, offset, oldval).writeToLog();
+    	  //Task 2
+    	  //Store both the old value and new value in the log record
+    	  return new SetStringRecord(txnum, blk, offset, oldval, newval).writeToLog();
    }
 
    /**
@@ -111,20 +115,40 @@ public class RecoveryMgr {
     * The method iterates through the log records.
     * Whenever it finds a log record for an unfinished
     * transaction, it calls undo() on that record.
-    * The method stops when it encounters a CHECKPOINT record
+    * The undo() method stops when it encounters a CHECKPOINT record
     * or the end of the log.
+    * After that, it calls redo() from the CHECKPOINT record,
+    * redo updates for committed transactions.
     */
    private void doRecover() {
       Collection<Integer> finishedTxs = new ArrayList<Integer>();
+      Collection<Integer> committedTxs = new ArrayList<Integer>();
       Iterator<LogRecord> iter = new LogRecordIterator();
       while (iter.hasNext()) {
          LogRecord rec = iter.next();
          if (rec.op() == CHECKPOINT)
-            return;
-         if (rec.op() == COMMIT || rec.op() == ROLLBACK)
+//            return;
+        	 break;
+         if (rec.op() == COMMIT) {
             finishedTxs.add(rec.txNumber());
+            committedTxs.add(rec.txNumber());
+         }
+         if (rec.op() == ROLLBACK) {
+        	 finishedTxs.add(rec.txNumber());
+         }
          else if (!finishedTxs.contains(rec.txNumber()))
             rec.undo(txnum);
+      }
+      
+      //Task 2 Redo Phase
+      //Iterate every log record in forward direction, and restore new values of
+      //every update operation for committed transactions.
+      Iterator<LogRecord> fiter = new FLogRecordIterator();
+      while (fiter.hasNext()) {
+    	  LogRecord frec = fiter.next();
+    	  if(committedTxs.contains(frec.txNumber())) {
+    		  frec.redo(txnum);
+    	  }
       }
    }
 

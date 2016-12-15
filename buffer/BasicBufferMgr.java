@@ -13,10 +13,10 @@ import java.util.*;
 class BasicBufferMgr {
    private Buffer[] bufferpool;
    private int numAvailable;
-   
-   //Part A Task 1 buffer pool data structure: HashMap bufferPoolMap
+   //Task 1
+   //buffer pool data structure: HashMap bufferPoolMap
    private Map<String, Buffer> bufferPoolMap;
-   //Part A Task 2 replacement strategy data structure: LinkedList bufferQueue
+   //replacement strategy data structure: LinkedList bufferQueue
    private List<Block> bufferQueue;
    
    /**
@@ -236,6 +236,32 @@ class BasicBufferMgr {
    void saveMapping(Block blk, Buffer buf) {
 	   String key = getBlockKey(blk);
 	   bufferPoolMap.put(key, buf);
+   }
+   
+   /*****************Test******************/
+   synchronized Buffer[] pool() {
+	   return bufferpool;
+   }
+   
+   void clearBufferPool() {
+	   for(int i = 0; i < bufferpool.length; i++) {
+		   bufferpool[i] = new Buffer();
+	   }
+	   numAvailable = bufferpool.length;
+	   bufferPoolMap.clear();
+	   bufferQueue.clear();
+   }
+   
+   void printQueue() {
+	   for(Block blk : bufferQueue) {
+		   System.out.println(blk.number());
+	   }
+   }
+   
+   void printBufferPool() {
+	   for(Buffer buf : bufferpool) {
+		   System.out.println(buf.block().number());
+	   }
    }
    
 }

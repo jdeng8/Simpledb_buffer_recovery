@@ -49,6 +49,9 @@ class CheckpointRecord implements LogRecord {
     */
    public void undo(int txnum) {}
    
+   //Task 2
+   public void redo(int txnum) {}
+   
    public String toString() {
       return "<CHECKPOINT>";
    }

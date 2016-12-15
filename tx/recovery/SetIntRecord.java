@@ -8,19 +8,26 @@ import simpledb.log.BasicLogRecord;
 class SetIntRecord implements LogRecord {
    private int txnum, offset, val;
    private Block blk;
+   //Task 2
+   //Store the new integer value
+   private int newval;
 
    /**
     * Creates a new setint log record.
     * @param txnum the ID of the specified transaction
     * @param blk the block containing the value
     * @param offset the offset of the value in the block
-    * @param val the new value
+    * @param val the old value
+    * @param newval the new value
     */
-   public SetIntRecord(int txnum, Block blk, int offset, int val) {
+   
+   //Task 2
+   public SetIntRecord(int txnum, Block blk, int offset, int val, int newval) {
       this.txnum = txnum;
       this.blk = blk;
       this.offset = offset;
       this.val = val;
+      this.newval = newval;
    }
 
    /**
@@ -34,21 +41,26 @@ class SetIntRecord implements LogRecord {
       blk = new Block(filename, blknum);
       offset = rec.nextInt();
       val = rec.nextInt();
+      //Task 2
+      newval = rec.nextInt();
    }
 
    /**
     * Writes a setInt record to the log.
     * This log record contains the SETINT operator,
     * followed by the transaction id, the filename, number,
-    * and offset of the modified block, and the previous
-    * integer value at that offset.
+    * and offset of the modified block, the previous
+    * integer value at that offset, and the new integer value.
     * @return the LSN of the last log value
     */
+   
+   //Task 2
    public int writeToLog() {
       Object[] rec = new Object[] {SETINT, txnum, blk.fileName(),
-         blk.number(), offset, val};
+         blk.number(), offset, val, newval};
       return logMgr.append(rec);
    }
+   
 
    public int op() {
       return SETINT;
@@ -57,9 +69,11 @@ class SetIntRecord implements LogRecord {
    public int txNumber() {
       return txnum;
    }
-
+   
+   //Task 2
+   //Print the log with both old value and new value
    public String toString() {
-      return "<SETINT " + txnum + " " + blk + " " + offset + " " + val + ">";
+      return "<SETINT " + txnum + " " + blk + " " + offset + " " + val + " " + newval + ">";
    }
 
    /**
@@ -73,6 +87,15 @@ class SetIntRecord implements LogRecord {
       BufferMgr buffMgr = SimpleDB.bufferMgr();
       Buffer buff = buffMgr.pin(blk);
       buff.setInt(offset, val, txnum, -1);
+      buffMgr.unpin(buff);
+   }
+   
+   //Task 2
+   //Set the new value
+   public void redo(int txnum) {
+      BufferMgr buffMgr = SimpleDB.bufferMgr();
+      Buffer buff = buffMgr.pin(blk);
+      buff.setInt(offset, newval, txnum, -1);
       buffMgr.unpin(buff);
    }
 }

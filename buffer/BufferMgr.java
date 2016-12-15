@@ -121,4 +121,21 @@ public class BufferMgr {
    private boolean waitingTooLong(long starttime) {
       return System.currentTimeMillis() - starttime > MAX_TIME;
    }
+   
+   /********Test*******/
+   public synchronized Buffer[] pool() {
+	   return bufferMgr.pool();
+   }
+   
+   public void clearBufferPool() {
+	   bufferMgr.clearBufferPool();
+   }
+   
+   public void printQueue() {
+	   bufferMgr.printQueue();
+   }
+   
+   public void printBufferPool() {
+	   bufferMgr.printBufferPool();
+   }
 }
